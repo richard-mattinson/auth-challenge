@@ -15,11 +15,24 @@ function App() {
   }, []);
 
   const handleRegister = async ({ username, password }) => {
-    
+    const response = await fetch(`${apiUrl}/user/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify( {username, password} ),
+    }) 
+    const register = await response.json();
+    console.log("Register response", register);
   };
 
   const handleLogin = async ({ username, password }) => {
-    
+    const response = await fetch(`${apiUrl}/user/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify( {username, password} ),
+    })
+    const login = await response.json();
+    console.log("Login response", login);
+    localStorage.setItem("token", login.data);
   };
   
   const handleCreateMovie = async ({ title, description, runtimeMins }) => {

@@ -3,34 +3,44 @@ const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-const jwtSecret = 'mysecret';
+const jwtSecret = process.env.JWT_SECRET_KEY
 
 const register = async (req, res) => {
-    const { username, password } = req.body;
+  // Insomnia http://www.localhost:4000/user/register
+  const saltRounds = 10;
+  const { username, password } = req.body;
 
-    const createdUser = null;
+  const hashPassword = await bcrypt.hash(password, saltRounds);
 
-    res.json({ data: createdUser });
+  const createdUser = await prisma.user.create({
+    data: {
+      username: username,
+      password: hashPassword,
+    },
+  });
+  console.log("createdUser", createdUser);
+  res.status(201).json({ user: username, id: createdUser.id});
 };
 
 const login = async (req, res) => {
-    const { username, password } = req.body;
+  // Insomnia http://www.localhost:4000/user/login
+  const { username, password } = req.body;
 
-    const foundUser = null;
+  const foundUser = await prisma.user.findUnique({
+    where: { username: username },
+  });
+  if (!foundUser) {
+    return res.status(401).json({ error: "Invalid username or password." });
+  }
 
-    if (!foundUser) {
-        return res.status(401).json({ error: 'Invalid username or password.' });
-    }
+  const passwordsMatch = await bcrypt.compare(password, foundUser.password);
+  if (!passwordsMatch) {
+    return res.status(401).json({ error: "Invalid username or password." });
+  }
 
-    const passwordsMatch = false;
+  const token = jwt.sign({ username }, jwtSecret);
 
-    if (!passwordsMatch) {
-        return res.status(401).json({ error: 'Invalid username or password.' });
-    }
-
-    const token = null;
-
-    res.json({ data: token });
+  res.json({ data: token });
 };
 
 module.exports = {
