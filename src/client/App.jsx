@@ -1,3 +1,4 @@
+import { prisma } from '@prisma/client';
 import { useEffect, useState } from 'react';
 import './App.css';
 import MovieForm from './components/MovieForm';
@@ -8,35 +9,66 @@ const apiUrl = 'http://localhost:4000';
 function App() {
   const [movies, setMovies] = useState([]);
 
+  const [registerResponse, setRegisterResponse] = useState("");
+  const [loginResponse, setLoginResponse] = useState("");
+  const [createMovieResponse, setCreateMovieResponse] = useState("");
+
   useEffect(() => {
     fetch(`${apiUrl}/movie`)
       .then(res => res.json())
       .then(res => setMovies(res.data));
   }, []);
 
+  //below: we don't need event preventDefault here because that is being handled within components/UserForm
   const handleRegister = async ({ username, password }) => {
-    const response = await fetch(`${apiUrl}/user/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify( {username, password} ),
-    }) 
-    const register = await response.json();
-    console.log("Register response", register);
-  };
+    try {
+      // const checkForExistingUser = await prisma.user.findMany({ where: {username: username}})
+  
+      // if (checkForExistingUser.length !== 0){
+      //   setRegisterResponse(`Sorry, that username is taken!`)
+      // } 
+      if (!username || !password) {
+        setRegisterResponse(`Please enter a username and password`);
+      } else {
+        const response = await fetch(`${apiUrl}/user/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify( {username, password} ),
+        }) 
+        const register = await response.json();
+        console.log("Register response", register);
+        setRegisterResponse(`Thank you for registering ${username}!`)
+      }
 
+    } catch (err) {
+      setRegisterResponse(`Registration failed`)
+    }
+
+  };
+    
   // the token is created during registration, but only added to local storage during login
   const handleLogin = async ({ username, password }) => {
-    const response = await fetch(`${apiUrl}/user/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify( {username, password} ),
-    })
-    const login = await response.json();
-    console.log("Handle Login response", login);
-    console.log(bearer);
-    // below: local storage takes a key/name pair
-    localStorage.setItem("token", login.data);
-  };
+    try {
+      if (!username || !password) {
+      setLoginResponse(`Please enter a username and password`);
+      } else {
+        const response = await fetch(`${apiUrl}/user/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify( {username, password} ),
+        })
+        const login = await response.json();
+        console.log("Handle Login response", login);
+        console.log(bearer);
+        // below: local storage takes a key/name pair
+        localStorage.setItem("token", login.data);
+        setLoginResponse(`Welcome back ${username}`)
+      };
+    } catch (err) {
+      setLoginResponse(`Login failed`)
+    }
+  }
+
   
   const handleCreateMovie = async ({ title, description, runtimeMins }) => {
     const token = localStorage.getItem("token")
@@ -62,9 +94,11 @@ function App() {
     <div className="App">
       <h1>Register</h1>
       <UserForm handleSubmit={handleRegister} />
+      {registerResponse && <p>{registerResponse}</p>}
 
       <h1>Login</h1>
       <UserForm handleSubmit={handleLogin} />
+      {loginResponse && <p>{loginResponse}</p>}
 
       <h1>Create a movie</h1>
       <MovieForm handleSubmit={handleCreateMovie} />

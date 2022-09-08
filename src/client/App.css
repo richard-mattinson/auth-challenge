@@ -1,5 +1,8 @@
 .App {
   text-align: center;
+  background-image: linear-gradient(to top right, rgb(46, 2, 2), rgb(73, 60, 60));
+  color: white;
+  font-family: 'Courier New', Courier, monospace;
 }
 
 .App-logo {
@@ -13,8 +16,7 @@
   }
 }
 
-.App-header {
-  background-color: #282c34;
+.App-header { 
   min-height: 100vh;
   display: flex;
   flex-direction: column;
