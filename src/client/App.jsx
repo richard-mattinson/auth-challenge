@@ -24,6 +24,7 @@ function App() {
     console.log("Register response", register);
   };
 
+  // the token is created during registration, but only added to local storage during login
   const handleLogin = async ({ username, password }) => {
     const response = await fetch(`${apiUrl}/user/login`, {
       method: 'POST',
@@ -31,12 +32,30 @@ function App() {
       body: JSON.stringify( {username, password} ),
     })
     const login = await response.json();
-    console.log("Login response", login);
+    console.log("Handle Login response", login);
+    console.log(bearer);
+    // below: local storage takes a key/name pair
     localStorage.setItem("token", login.data);
   };
   
   const handleCreateMovie = async ({ title, description, runtimeMins }) => {
-    
+    const token = localStorage.getItem("token")
+    console.log("Handle Create Movie response", token);
+    const response = await fetch(`${apiUrl}/movie`, {
+      method: 'POST',
+      // this time we grab both the json body and token from the header
+      headers: { 
+      'Content-Type': 
+      'application/json', 
+      // 'Authorization': token },
+      'Authorization': 'Bearer ' + token },
+      body: JSON.stringify( {title, description, runtimeMins} ),
+    })
+    const movie = await response.json();
+    // below: movies exists in State
+    const createMovieList = [...movies, movie.data] 
+    console.log("Create Movie", createMovieList);
+    setMovies(createMovieList);
   }
 
   return (
