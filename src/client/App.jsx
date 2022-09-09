@@ -47,6 +47,7 @@ function App() {
   };
     
   // the token is created during registration, but only added to local storage during login
+  
   const handleLogin = async ({ username, password }) => {
     try {
       if (!username || !password) {
@@ -59,7 +60,6 @@ function App() {
         })
         const login = await response.json();
         console.log("Handle Login response", login);
-        console.log(bearer);
         // below: local storage takes a key/name pair
         localStorage.setItem("token", login.data);
         setLoginResponse(`Welcome back ${username}`)

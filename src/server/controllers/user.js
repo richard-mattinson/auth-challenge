@@ -39,8 +39,9 @@ const login = async (req, res) => {
   }
 
   const token = jwt.sign({ username }, jwtSecret);
+  console.log("Server Login Token", token);
 
-  res.json({ data: token });
+  res.status(201).json({ token });
 };
 
 module.exports = {
